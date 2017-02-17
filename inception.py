@@ -71,12 +71,12 @@ class NameLookup:
         # Mappings between uid, cls and name are dicts, where insertions and
         # lookup have O(1) time-usage on average, but may be O(n) in worst case.
         self._uid_to_cls = {}   # Map from uid to cls.
-        self._uid_to_name = {}  # Map from uid to name.
+        self._uid_to_name = {}  # Map from uid to name. e.g.n01440764 to car,etc. 
         self._cls_to_uid = {}   # Map from cls to uid.
 
         # Read the uid-to-name mappings from file.
         path = os.path.join(data_dir, path_uid_to_name)
-        with open(file=path, mode='r') as file:
+        with open(path, mode='r') as file:
             # Read all lines from the file.
             lines = file.readlines()
 
@@ -98,7 +98,7 @@ class NameLookup:
 
         # Read the uid-to-cls mappings from file.
         path = os.path.join(data_dir, path_uid_to_cls)
-        with open(file=path, mode='r') as file:
+        with open(path, mode='r') as file:
             # Read all lines from the file.
             lines = file.readlines()
 
