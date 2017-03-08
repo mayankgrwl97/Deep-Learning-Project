@@ -59,7 +59,7 @@ class NameLookup:
 
     Maps between:
     - cls is the class-number as an integer between 1 and 1000 (inclusive).
-    - uid is a class-id as a string from the ImageNet data-set, e.g. "n00017222".
+    - uid  is a class-id     as a string from the ImageNet data-set, e.g. "n00017222".
     - name is the class-name as a string, e.g. "plant, flora, plant life"
 
     There are actually 1008 output classes of the Inception model
