@@ -16,6 +16,7 @@ import tensorflow as tf
 # from cache import cache
 import os
 import sys
+import scipy.misc
 
 ########################################################################
 # Various directories and file-names.
@@ -237,7 +238,9 @@ class Inception:
                 graph_def.ParseFromString(file.read())
 
                 # Finally we import the graph-def to the default TensorFlow graph.
-                tf.import_graph_def(graph_def, name='')
+                # Since self.graph is the default tf graph import_graph_def would import 
+                # the graph into it
+                tf.import_graph_def(graph_def, name='') 
 
                 # Now self.graph holds the Inception model from the proto-buf file.
 
@@ -308,6 +311,7 @@ class Inception:
             image_data = tf.gfile.FastGFile(image_path, 'rb').read()
 
             # Image is passed in as a jpeg-encoded image.
+            # We need to decode the image first
             feed_dict = {self.tensor_name_input_jpeg: image_data}
 
         else:
@@ -341,8 +345,9 @@ class Inception:
         pred = self.session.run(self.y_pred, feed_dict=feed_dict)
 
         # Reduce the array to a single dimension.
+        # Upto this point pred if of the shape (1,1008)
         pred = np.squeeze(pred)
-
+        # now pred is of the shape (1008,)
         return pred
 
     def get_resized_image(self, image_path=None, image=None):
@@ -361,6 +366,9 @@ class Inception:
         :return:
             A 3-dim array holding the image.
         """
+		# For saving the output image as file
+		# import scipy.misc
+		# scipy.misc.imsave('outfile.jpg', image_array)
 
         # Create a feed-dict for the TensorFlow graph with the input image.
         feed_dict = self._create_feed_dict(image_path=image_path, image=image)
@@ -395,6 +403,7 @@ class Inception:
         """
 
         # Get a sorted index for the pred-array.
+        # returns the list of index that would sort the array
         idx = pred.argsort()
 
         # The index is sorted lowest-to-highest values. Take the last k.
@@ -443,10 +452,51 @@ class Inception:
         # prior to the softmax-classification, which we call transfer-values.
         transfer_values = self.session.run(self.transfer_layer, feed_dict=feed_dict)
 
+        # Uptil here the transfer_values shape is (1,1,1,2048)
+
         # Reduce to a 1-dim array.
         transfer_values = np.squeeze(transfer_values)
 
         return transfer_values
+
+    def get_conv_layer_names(self):
+	    # Load the Inception model.
+	    
+	    # Create a list of names for the operations in the graph
+	    # for the Inception model where the operator-type is 'Conv2D'.
+	    names = [op.name for op in self.graph.get_operations() if op.type=='Conv2D']
+
+	    return names
+
+    def get_conv_images(self, tensor_name_conv_layer, image_path=None, image=None):
+	# For saving the output image as file
+	# import scipy.misc
+	# scipy.misc.imsave('outfile.jpg', image_array)
+
+		if tensor_name_conv_layer is None:
+			print "No convolution layer selected"
+			return
+
+		# Create a feed-dict for the TensorFlow graph with the input image.
+		feed_dict = self._create_feed_dict(image_path=image_path, image=image)
+
+		# Execute the TensorFlow session to get the predicted labels.
+
+		conv_image = self.graph.get_tensor_by_name(tensor_name_conv_layer)
+		conv_image = self.session.run(conv_image, feed_dict=feed_dict)
+
+		# Remove the 1st dimension of the 4-dim tensor.
+		conv_image = conv_image.squeeze(axis=0)
+
+		# Scale pixels to be between 0.0 and 1.0
+		conv_image = conv_image.astype(float) / 255.0
+		num_conv_filters = conv_image.shape[-1]
+
+		for i in range(32):
+			name_output_file = 'fout' + "_" + str(i) + ".jpg"
+			scipy.misc.imsave(name_output_file, conv_image[:,:,i])
+
+		return 
 
 
 ########################################################################
@@ -563,18 +613,24 @@ if __name__ == '__main__':
     # Load the Inception model so it is ready for classifying images.
     model = Inception()
 
+    image_path = '/home/pixel/mayank/code/Datasets/skiingvsskating/iceskating/iceskating_9.jpg'
+
     # Path for a jpeg-image that is included in the downloaded data.
-    image_path = os.path.join(data_dir, 'cropped_panda.jpg')
+    # image_path = os.path.join(data_dir, 'cropped_panda.jpg')
 
-    # Use the Inception model to classify the image.
-    pred = model.classify(image_path=image_path)
+    # # Use the Inception model to classify the image.
+    # pred = model.classify(image_path=image_path)
 
-    # Print the scores and names for the top-10 predictions.
-    model.print_scores(pred=pred, k=10)
+    # # Print the scores and names for the top-10 predictions.
+    # model.print_scores(pred=pred, k=10)
 
-    # Close the TensorFlow session.
-    model.close()
+    # # Close the TensorFlow session.
+    # model.close()
 
     # Transfer Learning is demonstrated in Tutorial #08.
+
+    layer1 = model.get_conv_layer_names()[1]
+    layer1 = layer1 + str(':0')
+    model.get_conv_images(layer1, image_path)
 
 ########################################################################
