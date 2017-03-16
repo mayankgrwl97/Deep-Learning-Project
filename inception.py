@@ -13,7 +13,7 @@
 import numpy as np
 import tensorflow as tf
 # import download
-# from cache import cache
+import cache
 import os
 import sys
 import scipy.misc
@@ -522,7 +522,7 @@ def process_images(fn, images=None, image_paths=None):
     """
 
     # Are we using images or image_paths?
-    using_images = images is not None
+    using_images = images is not None #boolean
 
     # Number of images.
     if using_images:
@@ -629,8 +629,8 @@ if __name__ == '__main__':
 
     # Transfer Learning is demonstrated in Tutorial #08.
 
-    layer1 = model.get_conv_layer_names()[1]
-    layer1 = layer1 + str(':0')
-    model.get_conv_images(layer1, image_path)
+    # layer1 = model.get_conv_layer_names()[1]
+    # layer1 = layer1 + str(':0')
+    # model.get_conv_images(layer1, image_path)
 
 ########################################################################
