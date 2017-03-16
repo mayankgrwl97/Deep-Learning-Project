@@ -613,19 +613,19 @@ if __name__ == '__main__':
     # Load the Inception model so it is ready for classifying images.
     model = Inception()
 
-    image_path = '/home/pixel/mayank/code/Datasets/skiingvsskating/iceskating/iceskating_9.jpg'
+    # image_path = '/home/pixel/mayank/code/Datasets/skiingvsskating/iceskating/iceskating_9.jpg'
 
     # Path for a jpeg-image that is included in the downloaded data.
-    # image_path = os.path.join(data_dir, 'cropped_panda.jpg')
+    image_path = os.path.join(data_dir, 'cropped_panda.jpg')
 
-    # # Use the Inception model to classify the image.
-    # pred = model.classify(image_path=image_path)
+    # Use the Inception model to classify the image.
+    pred = model.classify(image_path=image_path)
 
     # # Print the scores and names for the top-10 predictions.
-    # model.print_scores(pred=pred, k=10)
+    model.print_scores(pred=pred, k=10)
 
     # # Close the TensorFlow session.
-    # model.close()
+    model.close()
 
     # Transfer Learning is demonstrated in Tutorial #08.
 
